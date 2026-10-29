@@ -33,6 +33,7 @@ export const api = {
   spin: (bet) => request("/spin", { method: "POST", body: bet }),
   buyUpgrade: (id) => request(`/upgrades/${encodeURIComponent(id)}/buy`, { method: "POST" }),
   save: () => request("/save", { method: "POST" }),
+  reset: () => request("/reset", { method: "POST" }),
   // Werkt ook als het tabblad gesloten wordt.
   saveOnExit: () => navigator.sendBeacon(CONFIG.apiBase + "/save"),
 };

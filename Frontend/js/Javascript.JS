@@ -11,6 +11,7 @@ class Game {
     this.state = null;
     this.spinning = false;
     this.refreshing = false;
+    this.maxBet = false;
 
     this.el = {
       spinButton: document.getElementById("spin-button"),
@@ -20,6 +21,8 @@ class Game {
       saveButton: document.getElementById("save-button"),
       saveStatus: document.getElementById("save-status"),
       banner: document.getElementById("connection-banner"),
+      bankrupt: document.getElementById("bankrupt-banner"),
+      resetButton: document.getElementById("reset-button"),
     };
 
     this.wheel = new Wheel(document.getElementById("wheel"), CONFIG.spinDurationMs);
@@ -34,9 +37,13 @@ class Game {
   async start() {
     this.el.amount.value = CONFIG.defaultBet;
     this.renderChips();
-    this.el.amount.addEventListener("input", () => this.updateControls());
+    this.el.amount.addEventListener("input", () => {
+      this.maxBet = false;
+      this.updateControls();
+    });
     this.el.spinButton.addEventListener("click", () => this.spin());
     this.el.saveButton.addEventListener("click", () => this.save());
+    this.el.resetButton.addEventListener("click", () => this.reset());
     window.addEventListener("pagehide", () => api.saveOnExit());
 
     await this.refresh();
@@ -51,21 +58,28 @@ class Game {
     const chips = CONFIG.chips.map((value) => this.createChip(formatMoney(value), () => value));
     chips.push(
       this.createChip("×2", () => this.betAmount() * 2),
-      this.createChip("Max", () => Math.floor(this.state?.balance ?? 0)),
+      this.createChip("Max", () => this.maxAmount(), { max: true }),
     );
     this.el.chips.replaceChildren(...chips);
   }
 
-  createChip(label, getValue) {
+  createChip(label, getValue, { max = false } = {}) {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "chip";
     chip.textContent = label;
     chip.addEventListener("click", () => {
+      this.maxBet = max;
       this.el.amount.value = Math.max(1, getValue());
       this.updateControls();
     });
     return chip;
+  }
+
+  // Bots veranderen het saldo; updateControls() houdt de Max-inzet daarom gelijk met het saldo.
+  maxAmount() {
+    if (!this.state) return 0;
+    return Math.floor(this.state.balance);
   }
 
   betAmount() {
@@ -86,11 +100,13 @@ class Game {
   }
 
   updateControls() {
+    if (this.maxBet) this.el.amount.value = Math.max(1, this.maxAmount());
     const bet = this.currentBet();
     const balance = this.state?.balance ?? 0;
     let problem = null;
 
-    if (!bet) problem = "Kies een vak op het bord.";
+    if (this.state?.bankrupt) problem = "Je bent blut. Begin opnieuw om verder te spelen.";
+    else if (!bet) problem = "Kies een vak op het bord.";
     else if (bet.amount < 1) problem = "Vul een inzet van minimaal €1 in.";
     else if (bet.amount > balance) problem = "Onvoldoende saldo voor deze inzet.";
 
@@ -105,6 +121,7 @@ class Game {
     this.stats.render(state);
     this.shop.render(state.upgrades, state.balance);
     this.history.render(state.history);
+    this.el.bankrupt.hidden = !state.bankrupt;
     this.updateControls();
   }
 
@@ -158,6 +175,22 @@ class Game {
     } catch (error) {
       this.toast.show(error.message, "error");
       if (this.state) this.shop.render(this.state.upgrades, this.state.balance);
+    }
+  }
+
+  async reset() {
+    this.el.resetButton.disabled = true;
+    try {
+      const { state } = await api.reset();
+      this.maxBet = false;
+      this.el.amount.value = CONFIG.defaultBet;
+      this.result.show(null);
+      this.applyState(state);
+      this.toast.show("Nieuw begin: je hebt weer €100.", "success");
+    } catch (error) {
+      this.toast.show(error.message, "error");
+    } finally {
+      this.el.resetButton.disabled = false;
     }
   }
 

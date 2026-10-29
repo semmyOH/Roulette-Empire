@@ -14,3 +14,6 @@
   - `Javascript.JS`: startpunt dat alles koppelt
 - `Frontend/API.md`: welke endpoints en JSON de frontend van de Flask-backend verwacht.
 - De spellogica zit niet in de frontend. Zonder backend toont de pagina "Geen verbinding met de server".
+- Melding "Je bent blut!" met knop "Opnieuw beginnen" (`POST /api/reset`).
+- De fiche "Max" loopt mee met het saldo (dat door botspins verandert).
+- Onderhoud wordt getoond per ronde (alle bots samen) en per botspin.

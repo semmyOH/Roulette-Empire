@@ -28,6 +28,7 @@ export class StatsView {
       lost: document.getElementById("stat-lost"),
       net: document.getElementById("stat-net"),
       upkeep: document.getElementById("stat-upkeep"),
+      upkeepNote: document.getElementById("stat-upkeep-note"),
       bots: document.getElementById("stat-bots"),
       botsNote: document.getElementById("stat-bots-note"),
     };
@@ -40,7 +41,8 @@ export class StatsView {
     this.el.lost.textContent = formatMoney(state.total_lost);
     this.el.net.textContent = formatSigned(state.net_profit);
     setTone(this.el.net, state.net_profit);
-    this.el.upkeep.textContent = `${formatMoney(state.upkeep_per_second)}/s`;
+    this.el.upkeep.textContent = `${formatMoney(state.upkeep_per_round)} per ronde`;
+    this.el.upkeepNote.textContent = `${formatMoney(state.upkeep_per_spin)} per botspin`;
     this.el.bots.textContent = String(state.bots.active);
     this.el.botsNote.textContent = state.bots.active > 0
       ? `spelen elke ${state.bots.interval_seconds} s`

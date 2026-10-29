@@ -20,6 +20,14 @@
     Geen verbinding met de server. Er wordt opnieuw verbinding gemaakt…
   </div>
 
+  <div id="bankrupt-banner" class="bankrupt" role="alert" hidden>
+    <div>
+      <strong>Je bent blut!</strong>
+      <span>Je hebt niet genoeg geld meer om in te zetten. De bots zijn gestopt.</span>
+    </div>
+    <button id="reset-button" type="button" class="btn btn-gold">Opnieuw beginnen</button>
+  </div>
+
   <section class="stats" aria-label="Statistieken">
     <div class="stat stat-main">
       <span class="stat-label">Saldo</span>
@@ -40,6 +48,7 @@
     <div class="stat">
       <span class="stat-label">Onderhoudskosten</span>
       <span id="stat-upkeep" class="stat-value">–</span>
+      <span id="stat-upkeep-note" class="stat-note"></span>
     </div>
     <div class="stat">
       <span class="stat-label">Actieve bots</span>

@@ -31,7 +31,10 @@ Elk endpoint dat de status verandert, stuurt de volledige nieuwe `state` terug.
   "total_won": 350.0,
   "total_lost": 180.0,
   "net_profit": 170.0,
-  "upkeep_per_second": 1.0,
+  "total_upkeep": 42.0,
+  "upkeep_per_spin": 1.0,
+  "upkeep_per_round": 2.0,
+  "bankrupt": false,
   "bots": { "active": 1, "interval_seconds": 5 },
   "upgrades": [
     {
@@ -56,14 +59,20 @@ Elk endpoint dat de status verandert, stuurt de volledige nieuwe `state` terug.
 - `history`: laatste spins, nieuwste eerst (de frontend toont alles wat binnenkomt, ±15 is genoeg).
   `color` is `"red"`, `"black"` of `"green"`. `net` is positief bij winst en negatief bij verlies
   (de inzet). `source` is `"player"` of `"bot"`.
-- `balance` mag negatief worden door onderhoudskosten.
+- Bots zetten elke `bots.interval_seconds` €5 in op rood of zwart. Elke botspin kost onderhoud:
+  `upkeep_per_spin` (€1, minder met Efficient Staff). `upkeep_per_round` is het totaal voor alle bots
+  samen per ronde. Zonder bots is er geen onderhoud. Een bot speelt alleen als het saldo de inzet plus
+  het onderhoud dekt, dus het saldo wordt nooit negatief.
+- `bankrupt` is `true` als het saldo lager is dan de minimale inzet (€1). Dan worden spins geweigerd
+  en toont de frontend de knop "Opnieuw beginnen".
+- `total_upkeep`: totaal betaalde onderhoudskosten (telt niet mee in `total_lost`).
 
 ## Endpoints
 
 ### `GET /api/state`
 
-Geeft `state` terug. De frontend vraagt dit elke seconde op, zo worden onderhoudskosten en botspins
-zichtbaar. De backend bepaalt zelf (bijvoorbeeld op basis van verstreken tijd) hoeveel kosten er zijn
+Geeft `state` terug. De frontend vraagt dit elke seconde op, zo worden botspins en hun
+onderhoudskosten zichtbaar. De backend bepaalt zelf (bijvoorbeeld op basis van verstreken tijd) hoeveel kosten er zijn
 afgeschreven en hoeveel botspins er gespeeld zijn.
 
 ### `POST /api/spin`
@@ -100,6 +109,12 @@ Response: `{ "saved_at": "2026-10-29T19:30:00Z" }`
 
 De frontend roept dit aan bij de knop "Opslaan", elke 30 seconden en bij het sluiten van de pagina
 (via `navigator.sendBeacon`, zonder body).
+
+### `POST /api/reset`
+
+Begint een nieuw spel (saldo €100, geen upgrades) en slaat dat direct op.
+
+Response: `{ "state": { ... } }`
 
 ## Fouten
 
