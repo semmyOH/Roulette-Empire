@@ -1,0 +1,33 @@
+// Instellingen voor de frontend. Balanswaarden (kansen, prijzen, kosten) staan in de backend.
+
+export const CONFIG = {
+  apiBase: "/api",
+  pollIntervalMs: 1000,
+  autoSaveIntervalMs: 30000,
+  spinDurationMs: 4500,
+  defaultBet: 10,
+  chips: [1, 5, 10, 25, 100],
+};
+
+// Europese roulette: volgorde van de vakken op het wiel, met de klok mee vanaf 0.
+export const WHEEL_ORDER = [
+  0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
+  5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26,
+];
+
+const RED_NUMBERS = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+
+export function colorOf(number) {
+  if (number === 0) return "green";
+  return RED_NUMBERS.has(number) ? "red" : "black";
+}
+
+export const COLOR_LABELS = { red: "Rood", black: "Zwart", green: "Groen" };
+
+export const BET_TYPES = {
+  red: { label: "Rood", payout: "1:1" },
+  black: { label: "Zwart", payout: "1:1" },
+  even: { label: "Even", payout: "1:1" },
+  odd: { label: "Oneven", payout: "1:1" },
+  number: { label: "Getal", payout: "35:1" },
+};
