@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Savegame (wordt automatisch aangemaakt)
+*.db
