@@ -22,7 +22,7 @@ class Game {
       saveButton: document.getElementById("save-button"),
       saveStatus: document.getElementById("save-status"),
       banner: document.getElementById("connection-banner"),
-      bankrupt: document.getElementById("bankrupt-banner"),
+      bankrupt: document.getElementById("bankrupt-dialog"),
       resetButton: document.getElementById("reset-button"),
     };
 
@@ -47,6 +47,8 @@ class Game {
     this.el.spinButton.addEventListener("click", () => this.spin());
     this.el.saveButton.addEventListener("click", () => this.save());
     this.el.resetButton.addEventListener("click", () => this.reset());
+    // Blut is geen keuze: Escape mag de pop-up niet wegklikken.
+    this.el.bankrupt.addEventListener("cancel", (event) => event.preventDefault());
     window.addEventListener("pagehide", () => api.saveOnExit());
 
     await this.refresh();
@@ -112,8 +114,14 @@ class Game {
     this.stats.render(state);
     this.shop.render(state.upgrades, state.balance);
     this.history.render(state.history);
-    this.el.bankrupt.hidden = !state.bankrupt;
+    this.showBankrupt(state.bankrupt);
     this.updateControls();
+  }
+
+  showBankrupt(bankrupt) {
+    const dialog = this.el.bankrupt;
+    if (bankrupt && !dialog.open) dialog.showModal();
+    else if (!bankrupt && dialog.open) dialog.close();
   }
 
   setConnected(connected) {

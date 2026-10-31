@@ -56,3 +56,9 @@
   gebruikt nu `value` in plaats van `number` (zie `Frontend/API.md`).
 - Lucky Wheel werkt op alle inzetten samen: het verhoogt de kans dat de spin in totaal winst oplevert.
 - Tests uitgebreid voor de nieuwe inzetten en meerdere inzetten per spin.
+
+## 31-10-2026: Kleine verbeteringen (branch `small-features`)
+
+- "Je bent blut!" is nu een pop-up in het midden van het scherm (een `<dialog>`) met een donkere
+  achtergrond eroverheen, in plaats van een balk bovenaan. Je kunt hem alleen sluiten met
+  "Opnieuw beginnen".
