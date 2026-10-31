@@ -20,13 +20,12 @@
     Geen verbinding met de server. Er wordt opnieuw verbinding gemaakt…
   </div>
 
-  <div id="bankrupt-banner" class="bankrupt" role="alert" hidden>
-    <div>
-      <strong>Je bent blut!</strong>
-      <span>Je hebt niet genoeg geld meer om in te zetten. De bots zijn gestopt.</span>
-    </div>
+  <dialog id="bankrupt-dialog" class="bankrupt-dialog" aria-labelledby="bankrupt-title" aria-describedby="bankrupt-text">
+    <span class="bankrupt-icon" aria-hidden="true">💸</span>
+    <h2 id="bankrupt-title">Je bent blut!</h2>
+    <p id="bankrupt-text">Je hebt niet genoeg geld meer om in te zetten. De bots zijn gestopt.</p>
     <button id="reset-button" type="button" class="btn btn-gold">Opnieuw beginnen</button>
-  </div>
+  </dialog>
 
   <section class="stats" aria-label="Statistieken">
     <div class="stat stat-main">

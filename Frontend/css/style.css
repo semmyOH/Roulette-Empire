@@ -157,41 +157,59 @@ button {
   text-align: center;
 }
 
-.bankrupt {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
-  flex-wrap: wrap;
-  max-width: calc(1280px - 32px);
-  margin: 0 auto 16px;
-  padding: 14px 18px;
-  background: linear-gradient(160deg, rgba(179, 32, 42, 0.3), var(--panel));
-  border: 1px solid rgba(255, 122, 112, 0.5);
-  border-radius: var(--radius);
-}
-
-.bankrupt div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.bankrupt strong {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  color: var(--negative);
-}
-
-.banner[hidden],
-.bankrupt[hidden] {
+.banner[hidden] {
   display: none;
 }
 
-@media (max-width: 1312px) {
-  .bankrupt {
-    margin-left: 16px;
-    margin-right: 16px;
+/* Pop-up "Je bent blut!" (een <dialog>, de browser centreert hem en legt hem boven alles) */
+.bankrupt-dialog {
+  width: min(420px, calc(100% - 32px));
+  padding: 32px 28px 28px;
+  background: linear-gradient(170deg, #2a1414, var(--panel) 60%);
+  border: 1px solid rgba(255, 122, 112, 0.55);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(212, 175, 55, 0.15);
+  color: var(--text);
+  text-align: center;
+}
+
+.bankrupt-dialog::backdrop {
+  background: rgba(5, 4, 3, 0.75);
+  backdrop-filter: blur(3px);
+}
+
+.bankrupt-dialog[open] {
+  animation: dialog-in 0.25s ease-out;
+}
+
+.bankrupt-icon {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.bankrupt-dialog h2 {
+  margin-bottom: 8px;
+  font-size: 1.6rem;
+  color: var(--negative);
+}
+
+.bankrupt-dialog p {
+  margin: 0 0 22px;
+  color: var(--muted);
+}
+
+.bankrupt-dialog .btn {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
   }
 }
 
