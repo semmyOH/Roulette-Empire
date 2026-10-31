@@ -5,8 +5,15 @@ export const CONFIG = {
   pollIntervalMs: 1000,
   autoSaveIntervalMs: 30000,
   spinDurationMs: 4500,
-  defaultBet: 10,
-  chips: [1, 5, 10, 25, 100],
+  defaultChip: 10,
+  // Fichewaarden met hun kleur, zoals in een casino.
+  chips: [
+    { value: 1, color: "#d9d4c7", ink: "#231a06" },
+    { value: 5, color: "#c0392b" },
+    { value: 10, color: "#2f6fd1" },
+    { value: 25, color: "#1f8a4c" },
+    { value: 100, color: "#22201c" },
+  ],
 };
 
 // Europese roulette: volgorde van de vakken op het wiel, met de klok mee vanaf 0.
@@ -29,5 +36,8 @@ export const BET_TYPES = {
   black: { label: "Zwart", payout: "1:1" },
   even: { label: "Even", payout: "1:1" },
   odd: { label: "Oneven", payout: "1:1" },
+  dozen: { label: "Dozijn", payout: "2:1" },
+  column: { label: "Kolom", payout: "2:1" },
+  street: { label: "Straat", payout: "11:1" },
   number: { label: "Getal", payout: "35:1" },
 };

@@ -79,8 +79,11 @@ Er is één savegame (speler 1). Een `threading.RLock` zorgt dat gelijktijdige v
 door elkaar halen.
 
 **Eerlijke roulette.** Het wiel is een echt Europees wiel (37 vakken). De server bepaalt het getal; de
-frontend draait er alleen naartoe. Lucky Wheel verhoogt de winstkans door een deel van de verliezende
-spins om te zetten in een winnend vak, zodat getal, kleur en uitkomst altijd kloppen. Bots gebruiken
+frontend draait er alleen naartoe. Per spin kun je op meerdere vakken tegelijk inzetten: getallen
+(35:1), straten (11:1), dozijnen en kolommen (2:1) en rood/zwart/even/oneven (1:1). Welke getallen bij
+een inzet horen, staat op één plek: `covered_numbers()` in `game/roulette.py`. Lucky Wheel verhoogt de
+kans dat alle inzetten samen winst opleveren door een deel van de verliezende spins om te zetten in een
+winnend getal, zodat getal, kleur en uitkomst altijd kloppen. Bots gebruiken
 hetzelfde wiel en dezelfde upgrades als de speler.
 
 **Tijd.** Onderhoud en bots lopen op basis van verstreken tijd tussen verzoeken. Een pauze telt maximaal

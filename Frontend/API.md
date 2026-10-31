@@ -77,27 +77,55 @@ afgeschreven en hoeveel botspins er gespeeld zijn.
 
 ### `POST /api/spin`
 
+Eén spin met één of meer inzetten (maximaal 60). Alle inzetten samen mogen niet meer zijn dan het saldo.
+
 Request:
 
 ```json
-{ "bet_type": "red", "amount": 10 }
-{ "bet_type": "number", "number": 17, "amount": 10 }
+{
+  "bets": [
+    { "bet_type": "red", "amount": 10 },
+    { "bet_type": "dozen", "value": 1, "amount": 20 },
+    { "bet_type": "street", "value": 4, "amount": 5 },
+    { "bet_type": "number", "value": 17, "amount": 1 }
+  ]
+}
 ```
 
-`bet_type` is `"red"`, `"black"`, `"even"`, `"odd"` of `"number"`. `number` (0-36) alleen bij `"number"`.
-`amount` is een heel getal ≥ 1.
+| `bet_type` | `value`                                    | Wint bij                  | Uitbetaling |
+| ---------- | ------------------------------------------ | ------------------------- | ----------- |
+| `red`, `black`, `even`, `odd` | geen                    | kleur / even / oneven (0 verliest) | 1:1 |
+| `dozen`    | 1, 2 of 3 (1e 12 = 1-12, 2e 12 = 13-24, 3e 12 = 25-36) | getal in dat dozijn | 2:1 |
+| `column`   | 1, 2 of 3 ("2 to 1": kolom 1 = 1, 4, 7 … 34) | getal in die kolom        | 2:1         |
+| `street`   | 1 t/m 12 (straat 1 = 1-2-3, straat 12 = 34-35-36) | een van de 3 getallen | 11:1   |
+| `number`   | 0 t/m 36                                   | precies dat getal         | 35:1        |
+
+`amount` is een heel getal ≥ 1. Eén losse inzet zonder `bets`-lijst (`{ "bet_type": "red", "amount": 10 }`)
+werkt ook.
 
 Response:
 
 ```json
 {
-  "result": { "number": 17, "color": "black", "net": 10.0 },
+  "result": {
+    "number": 12,
+    "color": "red",
+    "net": 45.0,
+    "total_bet": 30,
+    "source": "player",
+    "bets": [
+      { "bet_type": "dozen", "value": 1, "amount": 20, "net": 40.0 },
+      { "bet_type": "street", "value": 1, "amount": 5, "net": -5.0 },
+      { "bet_type": "column", "value": 3, "amount": 5, "net": 10.0 }
+    ]
+  },
   "state": { "...": "..." }
 }
 ```
 
-Het wiel draait altijd naar `result.number`. Als de backend upgrades als "Lucky Wheel" toepast, moet
-het getal kloppen met winst of verlies (bijvoorbeeld: inzet op rood en winst, dan een rood getal).
+`net` is de winst of het verlies van alle inzetten samen; per inzet staat het in `bets`. Het wiel
+draait altijd naar `result.number`. Lucky Wheel verhoogt de kans dat alle inzetten samen winst
+opleveren; het getal klopt altijd met de uitkomst.
 
 ### `POST /api/upgrades/<id>/buy`
 

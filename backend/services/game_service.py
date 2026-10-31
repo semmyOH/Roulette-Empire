@@ -7,7 +7,7 @@ from datetime import datetime
 from game.config.balance import AUTOSAVE_INTERVAL_SECONDS, MAX_TICK_SECONDS
 from game.errors import GameError
 from game.modifiers import Modifiers
-from game.roulette import Bet
+from game.roulette import parse_bets
 from game.state import GameState, SpinRecord
 from services.bot_service import BotService
 from services.roulette_service import RouletteService
@@ -48,14 +48,16 @@ class GameService:
             self._tick()
             return self._serialize()
 
-    def spin(self, payload: dict) -> tuple[SpinRecord, dict]:
+    def spin(self, payload: dict) -> tuple[SpinRecord, list[dict], dict]:
+        """Speelt één spin met alle inzetten uit `payload`. Geeft de spin, de uitkomst per inzet en
+        de nieuwe status terug."""
         with self._lock:
             self._tick()
             if self._state.bankrupt:
                 raise GameError("Je bent blut. Begin opnieuw om verder te spelen.")
-            bet = Bet.from_dict(payload)
-            record = self.roulette.play(self._state, bet, self._modifiers(), source="player")
-            return record, self._serialize()
+            bets = parse_bets(payload)
+            record, bet_results = self.roulette.play(self._state, bets, self._modifiers(), source="player")
+            return record, bet_results, self._serialize()
 
     def buy_upgrade(self, upgrade_id: str) -> dict:
         with self._lock:

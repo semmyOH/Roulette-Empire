@@ -17,8 +17,12 @@ def get_state():
 @game_bp.post("/spin")
 def spin():
     payload = request.get_json(silent=True) or {}
-    record, state = game_service().spin(payload)
-    return {"result": record.to_dict(), "state": state}
+    record, bet_results, state = game_service().spin(payload)
+    result = record.to_dict() | {
+        "total_bet": sum(bet["amount"] for bet in bet_results),
+        "bets": bet_results,
+    }
+    return {"result": result, "state": state}
 
 
 @game_bp.post("/save")
