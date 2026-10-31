@@ -1,6 +1,6 @@
 // Startpunt van de frontend: koppelt de API aan het wiel, het inzetbord en de weergave.
 
-import { CONFIG, BET_TYPES } from "./config.js";
+import { CONFIG } from "./config.js";
 import { api } from "./api.js";
 import { Wheel } from "./wheel.js";
 import { BetBoard } from "./betting.js";
@@ -11,12 +11,13 @@ class Game {
     this.state = null;
     this.spinning = false;
     this.refreshing = false;
-    this.maxBet = false;
 
     this.el = {
       spinButton: document.getElementById("spin-button"),
-      amount: document.getElementById("bet-amount"),
       chips: document.getElementById("chip-row"),
+      undoButton: document.getElementById("undo-button"),
+      doubleButton: document.getElementById("double-button"),
+      clearButton: document.getElementById("clear-button"),
       summary: document.getElementById("bet-summary"),
       saveButton: document.getElementById("save-button"),
       saveStatus: document.getElementById("save-status"),
@@ -26,7 +27,10 @@ class Game {
     };
 
     this.wheel = new Wheel(document.getElementById("wheel"), CONFIG.spinDurationMs);
-    this.board = new BetBoard(document.getElementById("bet-board"), () => this.updateControls());
+    this.board = new BetBoard(document.getElementById("bet-board"), {
+      onChange: () => this.updateControls(),
+      canPlace: (extra) => this.canPlace(extra),
+    });
     this.stats = new StatsView();
     this.shop = new ShopView(document.getElementById("shop-list"), (id) => this.buyUpgrade(id));
     this.history = new HistoryView(document.getElementById("history-list"));
@@ -35,12 +39,11 @@ class Game {
   }
 
   async start() {
-    this.el.amount.value = CONFIG.defaultBet;
     this.renderChips();
-    this.el.amount.addEventListener("input", () => {
-      this.maxBet = false;
-      this.updateControls();
-    });
+    this.selectChip(CONFIG.defaultChip);
+    this.el.undoButton.addEventListener("click", () => this.board.undo());
+    this.el.doubleButton.addEventListener("click", () => this.board.double());
+    this.el.clearButton.addEventListener("click", () => this.board.clear());
     this.el.spinButton.addEventListener("click", () => this.spin());
     this.el.saveButton.addEventListener("click", () => this.save());
     this.el.resetButton.addEventListener("click", () => this.reset());
@@ -55,64 +58,52 @@ class Game {
   }
 
   renderChips() {
-    const chips = CONFIG.chips.map((value) => this.createChip(formatMoney(value), () => value));
-    chips.push(
-      this.createChip("×2", () => this.betAmount() * 2),
-      this.createChip("Max", () => this.maxAmount(), { max: true }),
-    );
+    const chips = CONFIG.chips.map(({ value, color, ink = "#fff" }) => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip";
+      chip.dataset.value = value;
+      chip.style.setProperty("--chip-color", color);
+      chip.style.setProperty("--chip-ink", ink);
+      chip.textContent = value;
+      chip.setAttribute("aria-label", `Fiche van ${formatMoney(value)}`);
+      chip.addEventListener("click", () => this.selectChip(value));
+      return chip;
+    });
     this.el.chips.replaceChildren(...chips);
   }
 
-  createChip(label, getValue, { max = false } = {}) {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "chip";
-    chip.textContent = label;
-    chip.addEventListener("click", () => {
-      this.maxBet = max;
-      this.el.amount.value = Math.max(1, getValue());
-      this.updateControls();
-    });
-    return chip;
+  selectChip(value) {
+    this.board.setChip(value);
+    for (const chip of this.el.chips.children) {
+      chip.setAttribute("aria-pressed", String(Number(chip.dataset.value) === value));
+    }
   }
 
-  // Bots veranderen het saldo; updateControls() houdt de Max-inzet daarom gelijk met het saldo.
-  maxAmount() {
-    if (!this.state) return 0;
-    return Math.floor(this.state.balance);
-  }
-
-  betAmount() {
-    return Math.floor(Number(this.el.amount.value)) || 0;
-  }
-
-  currentBet() {
-    const selection = this.board.selection;
-    if (!selection) return null;
-    const bet = { bet_type: selection.type, amount: this.betAmount() };
-    if (selection.type === "number") bet.number = selection.number;
-    return bet;
-  }
-
-  describeBet(bet) {
-    const target = bet.bet_type === "number" ? `getal ${bet.number}` : BET_TYPES[bet.bet_type].label;
-    return `${formatMoney(bet.amount)} op ${target} (uitbetaling ${BET_TYPES[bet.bet_type].payout})`;
+  canPlace(extra) {
+    const balance = this.state?.balance ?? 0;
+    if (this.board.total() + extra <= balance) return true;
+    this.toast.show(`Onvoldoende saldo: je hebt ${formatMoney(balance)}.`, "error");
+    return false;
   }
 
   updateControls() {
-    if (this.maxBet) this.el.amount.value = Math.max(1, this.maxAmount());
-    const bet = this.currentBet();
+    const total = this.board.total();
     const balance = this.state?.balance ?? 0;
     let problem = null;
 
     if (this.state?.bankrupt) problem = "Je bent blut. Begin opnieuw om verder te spelen.";
-    else if (!bet) problem = "Kies een vak op het bord.";
-    else if (bet.amount < 1) problem = "Vul een inzet van minimaal €1 in.";
-    else if (bet.amount > balance) problem = "Onvoldoende saldo voor deze inzet.";
+    else if (total === 0) problem = "Kies een fiche en klik op de vakken waar je op wilt inzetten.";
+    else if (total > balance) problem = `Onvoldoende saldo: je zet ${formatMoney(total)} in maar hebt ${formatMoney(balance)}.`;
 
-    this.el.summary.textContent = problem ?? this.describeBet(bet);
-    this.el.summary.classList.toggle("warning", Boolean(bet) && Boolean(problem));
+    const spots = this.board.count === 1 ? "1 vak" : `${this.board.count} vakken`;
+    this.el.summary.textContent = problem ?? `Totale inzet: ${formatMoney(total)} op ${spots}`;
+    this.el.summary.classList.toggle("warning", total > 0 && Boolean(problem));
+
     this.el.spinButton.disabled = Boolean(problem) || this.spinning || !this.state;
+    this.el.undoButton.disabled = this.spinning || !this.board.canUndo;
+    this.el.doubleButton.disabled = this.spinning || total === 0;
+    this.el.clearButton.disabled = this.spinning || total === 0;
     this.board.setDisabled(this.spinning);
   }
 
@@ -145,17 +136,20 @@ class Game {
   }
 
   async spin() {
-    const bet = this.currentBet();
-    if (!bet || this.spinning) return;
+    const bets = this.board.getBets();
+    if (bets.length === 0 || this.spinning) return;
 
     this.spinning = true;
+    this.board.clearHighlights();
     this.updateControls();
     this.result.showSpinning();
 
     try {
-      const { result, state } = await api.spin(bet);
+      const { result, state } = await api.spin({ bets });
       await this.wheel.spinTo(result.number);
       this.result.show(result);
+      // De inzetten blijven liggen, zodat je ze met één klik opnieuw kunt spelen.
+      this.board.showResult(result);
       this.applyState(state);
     } catch (error) {
       this.result.restore();
@@ -182,8 +176,7 @@ class Game {
     this.el.resetButton.disabled = true;
     try {
       const { state } = await api.reset();
-      this.maxBet = false;
-      this.el.amount.value = CONFIG.defaultBet;
+      this.board.clear();
       this.result.show(null);
       this.applyState(state);
       this.toast.show("Nieuw begin: je hebt weer €100.", "success");

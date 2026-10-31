@@ -161,11 +161,11 @@ export class ResultView {
     }
     this.number.textContent = result.number;
     this.number.className = `result-number pocket-${result.color}`;
-    const outcome = result.net > 0
-      ? `Je wint ${formatMoney(result.net)}`
-      : `Je verliest ${formatMoney(Math.abs(result.net))}`;
+    let outcome = "Quitte: je speelt precies gelijk";
+    if (result.net > 0) outcome = `Je wint ${formatMoney(result.net)}`;
+    else if (result.net < 0) outcome = `Je verliest ${formatMoney(Math.abs(result.net))}`;
     this.text.textContent = `${result.number} ${COLOR_LABELS[result.color]}: ${outcome}`;
-    this.text.className = `result-text ${result.net > 0 ? "positive" : "negative"}`;
+    this.text.className = `result-text ${result.net > 0 ? "positive" : result.net < 0 ? "negative" : ""}`;
   }
 
   showSpinning() {

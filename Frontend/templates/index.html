@@ -75,12 +75,15 @@
         <div id="bet-board" class="bet-board"></div>
 
         <div class="bet-controls">
-          <label for="bet-amount" class="stat-label">Inzet</label>
-          <div class="amount-input">
-            <span aria-hidden="true">€</span>
-            <input id="bet-amount" type="number" min="1" step="1" inputmode="numeric">
+          <div class="chip-picker">
+            <span id="chip-label" class="stat-label">Fiche</span>
+            <div id="chip-row" class="chips" role="group" aria-labelledby="chip-label"></div>
           </div>
-          <div id="chip-row" class="chips"></div>
+          <div class="bet-actions">
+            <button id="undo-button" type="button" class="btn btn-ghost btn-small">Ongedaan maken</button>
+            <button id="double-button" type="button" class="btn btn-ghost btn-small">×2</button>
+            <button id="clear-button" type="button" class="btn btn-ghost btn-small">Wissen</button>
+          </div>
         </div>
 
         <p id="bet-summary" class="bet-summary muted"></p>

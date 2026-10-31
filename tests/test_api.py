@@ -68,6 +68,25 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(data["state"]["balance"], 100 + data["result"]["net"])
         self.assertEqual(data["state"]["history"][0]["source"], "player")
 
+    def test_multiple_bets_in_one_spin(self):
+        bets = [
+            {"bet_type": "dozen", "value": 1, "amount": 10},
+            {"bet_type": "column", "value": 3, "amount": 5},
+            {"bet_type": "street", "value": 1, "amount": 2},
+            {"bet_type": "number", "value": 0, "amount": 1},
+        ]
+        response = self.client.post("/api/spin", json={"bets": bets})
+        self.assertEqual(response.status_code, 200)
+        result = response.get_json()["result"]
+        self.assertEqual(result["total_bet"], 18)
+        self.assertEqual(len(result["bets"]), 4)
+        self.assertEqual(result["net"], sum(bet["net"] for bet in result["bets"]))
+        self.assertEqual(response.get_json()["state"]["balance"], 100 + result["net"])
+
+    def test_bets_together_may_not_exceed_balance(self):
+        bets = [{"bet_type": "red", "amount": 60}, {"bet_type": "black", "amount": 60}]
+        self.assertEqual(self.client.post("/api/spin", json={"bets": bets}).status_code, 400)
+
     def test_invalid_spin_returns_dutch_error(self):
         response = self.client.post("/api/spin", json={"bet_type": "red", "amount": 500})
         self.assertEqual(response.status_code, 400)

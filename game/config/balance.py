@@ -17,6 +17,7 @@ HISTORY_SIZE = 15
 
 # Roulette
 MIN_BET = 1
+MAX_BETS_PER_SPIN = 60
 # Hoger dan dit kan Lucky Wheel de winstkans van een inzet niet krijgen.
 MAX_WIN_CHANCE = 0.75
 

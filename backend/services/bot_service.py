@@ -32,6 +32,6 @@ class BotService:
                 bet = self.bot.choose_bet(state.balance - upkeep)
                 if bet is None:
                     break
-                self.roulette.play(state, bet, modifiers, source="bot")
+                self.roulette.play(state, [bet], modifiers, source="bot")
                 state.balance -= upkeep
                 state.total_upkeep += upkeep

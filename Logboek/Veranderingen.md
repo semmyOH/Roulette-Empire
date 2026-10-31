@@ -42,3 +42,17 @@
 
 - `feature/frontend-roulette` en `feature/backend-game` zijn in `main` gemerged. De game start nu met
   `python app.py` vanuit de map `backend` (zie `README.md`).
+
+## 31-10-2026: Meerdere inzetten, dozijnen, kolommen en straten (branch `feature/meerdere-inzetten`)
+
+- Je kunt nu per spin op meerdere vakken tegelijk inzetten. Kies een fiche (€1, €5, €10, €25 of €100)
+  en klik op de vakken; de fiches stapelen zich op het bord.
+- Nieuwe inzetten: 1e/2e/3e 12 (dozijnen, 2:1), "2 to 1" (kolommen, 2:1) en straten (3 getallen op een
+  rij, 11:1).
+- Knoppen "Ongedaan maken", "×2" en "Wissen". Na een spin blijven de inzetten liggen, zodat je ze
+  opnieuw kunt spelen; winnende vakken lichten groen op.
+- Op mobiel staat de tafel rechtop: dozijnen links, straten rechts, "2 to 1" onderaan.
+- Backend: `POST /api/spin` neemt een lijst `bets` en geeft de uitkomst per inzet terug. Een inzet
+  gebruikt nu `value` in plaats van `number` (zie `Frontend/API.md`).
+- Lucky Wheel werkt op alle inzetten samen: het verhoogt de kans dat de spin in totaal winst oplevert.
+- Tests uitgebreid voor de nieuwe inzetten en meerdere inzetten per spin.

@@ -29,6 +29,15 @@ Hij verschijnt direct in de winkel, wordt opgeslagen en werkt mee in elke spin.
 3. Registreer hem in `EFFECT_TYPES` in `game/upgrades/catalog.py` en gebruik de naam bij `"effect"`.
 4. Gebruik het nieuwe veld waar het effect moet werken (bijvoorbeeld in `BotService`).
 
+## Een nieuw soort inzet toevoegen (bijvoorbeeld split of hoek)
+
+1. Voeg de soort toe aan `BetType` en `PAYOUT_RATIOS` in `game/roulette.py`.
+2. Heeft hij een `value` nodig, voeg dan een regel toe aan `VALUE_RULES` (laagste, hoogste, foutmelding).
+3. Bepaal in `covered_numbers()` welke getallen ermee winnen.
+4. Voeg in `Frontend/js/betting.js` een vak toe met `createSpot()`, met zijn plek op de tafel voor
+   bureaublad en mobiel, en zet het label en de uitbetaling in `BET_TYPES` in `Frontend/js/config.js`.
+5. Voeg een test toe in `tests/test_game_logic.py`.
+
 ## Een nieuwe bot toevoegen
 
 1. Maak `game/bots/<naam>.py` met een subklasse van `Bot`: geef `bot_type`, `interval_seconds` en
